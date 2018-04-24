@@ -1,0 +1,32 @@
+FROM openai/retro-agent:pytorch
+
+# Needed for OpenCV.
+RUN apt-get update && \
+    apt-get install -y libgtk2.0-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# Baselines has some unneeded and cumbersome dependencies,
+# so we manually fetch the deps we need.
+RUN . ~/venv/bin/activate && \
+    pip install scipy tqdm joblib zmq dill progressbar2 cloudpickle opencv-python && \
+    pip install --no-deps git+https://github.com/openai/baselines.git
+
+
+# Aux Scritps
+
+ADD arguments.py .
+ADD distributions.py .
+ADD enjoy.py .
+ADD envs.py .
+ADD model.py .
+ADD storage.py .
+ADD utils.py .
+ADD visualize.py .
+COPY sonic_tools ./sonic_tools
+COPY algo ./algo
+
+# Main Agent
+
+ADD retro_ppo_test.py ./agent.py
+
+CMD ["python", "-u", "/root/compo/agent.py", "--algo ppo --use-gae --lr 2.5e-4 --clip-param 0.1 --value-loss-coef 1 --num-processes 1 --num-steps 128 --num-mini-batch 4 --vis-interval 1 --log-interval 1"]
