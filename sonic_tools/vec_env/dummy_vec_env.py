@@ -5,7 +5,7 @@ from multiprocessing import Process
 
 class DummyVecEnv(VecEnv):
     def __init__(self, env_fns):
-        self.envs = [fn(k) for k, fn in enumerate(env_fns)]
+        self.envs = [fn() for fn in env_fns]
         env = self.envs[0]
         self.action_space = env.action_space
         self.observation_space = env.observation_space

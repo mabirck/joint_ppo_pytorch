@@ -20,7 +20,7 @@ except ImportError:
 THIS IS GUY IS MADE FOR TEST IN THE RETRO CONTEST
 !!!!!!!!!!!!!!!!!!!TAKE CARE!!!!!!!!!!!!!!!!!!!!!
 """
-def make_env(stack=True, scale_rew=True):
+def make_sonic_test(stack=True, scale_rew=True):
     """
     Create an environment with some standard wrappers.
     """
@@ -37,7 +37,7 @@ def make_env(stack=True, scale_rew=True):
 """
 THIS IS GUY IS MADE FOR TRAIN IN THE RETRO CONTEST
 """
-def make_env_train(env_id=None, stack=True, scale_rew=True):
+def make_sonic_train(env_id=None, stack=True, scale_rew=True):
     """
     Create an environment with some standard wrappers.
     """

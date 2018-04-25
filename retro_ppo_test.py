@@ -12,15 +12,16 @@ import torch.optim as optim
 from torch.autograd import Variable
 
 from arguments import get_args
-from baselines.common.vec_env.dummy_vec_env import DummyVecEnv
+#from baselines.common.vec_env.dummy_vec_env import DummyVecEnv
+from sonic_tools.vec_env.dummy_vec_env import DummyVecEnv
 from baselines.common.vec_env.subproc_vec_env import SubprocVecEnv
 from baselines.common.vec_env.vec_normalize import VecNormalize
-from envs import make_env
+from envs import make_env_test
 from model import CNNPolicy, MLPPolicy
 from storage import RolloutStorage
 #from visualize import visdom_plot
 
-from sonic_tools.sonic_util import make_env
+#from sonic_tools.sonic_util import make_env
 
 import algo
 
@@ -59,7 +60,7 @@ def main():
 
     # envs = [make_env(args.env_name, args.seed, i, args.log_dir)
     #             for i in range(args.num_processes)]
-    envs = [make_env]
+    envs = [make_env_test()]
 
     if args.num_processes > 1:
         envs = SubprocVecEnv(envs)

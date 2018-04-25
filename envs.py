@@ -6,7 +6,7 @@ from gym.spaces.box import Box
 from baselines import bench
 from baselines.common.atari_wrappers import make_atari, wrap_deepmind
 
-from sonic_tools.sonic_util import make_env_train
+from sonic_tools.sonic_util import make_sonic_train, make_sonic_test
 
 import numpy as np
 
@@ -22,7 +22,7 @@ except ImportError:
     pass
 
 
-def make_env(env_id, seed, rank, log_dir):
+def make_env_test():
     def _thunk():
         # if env_id.startswith("dm"):
         #     _, domain, task = env_id.split('.')
@@ -30,15 +30,15 @@ def make_env(env_id, seed, rank, log_dir):
         # else:
         #     env = gym.make(env_id)
 
-        env = make_env_train(env_id=env_id)
+        env = make_sonic_test()
 
         # is_atari = hasattr(gym.envs, 'atari') and isinstance(env.unwrapped, gym.envs.atari.atari_env.AtariEnv)
         # if is_atari:
         #     env = make_atari(env_id)
-        env.seed(seed + rank)
+        #env.seed(seed + rank)
 
-        if log_dir is not None:
-            env = bench.Monitor(env, os.path.join(log_dir, str(rank)))
+        #if log_dir is not None:
+        #    env = bench.Monitor(env, os.path.join(log_dir, str(rank)))
         # if is_atari:
         #     env = wrap_deepmind(env)
         # If the input has shape (W,H,3), wrap for PyTorch convolutions
@@ -51,6 +51,35 @@ def make_env(env_id, seed, rank, log_dir):
 
     return _thunk
 
+def make_env_train(env_id, seed, rank, log_dir):
+    def _thunk():
+        # if env_id.startswith("dm"):
+        #     _, domain, task = env_id.split('.')
+        #     env = dm_control2gym.make(domain_name=domain, task_name=task)
+        # else:
+        #     env = gym.make(env_id)
+
+        env = make_sonic_train(env_id=env_id)
+
+        # is_atari = hasattr(gym.envs, 'atari') and isinstance(env.unwrapped, gym.envs.atari.atari_env.AtariEnv)
+        # if is_atari:
+        #     env = make_atari(env_id)
+        env.seed(seed + rank)
+
+        if log_dir is not None:
+            env = bench.Monitor(env, os.path.join(log_dir, str(rank)))
+        # if is_atari:
+        #     env = wrap_deepmind(env)
+        # If the input has shape (W,H,3), wrap for PyTorch convolutions
+        obs_shape = env.observation_space.shape
+        print(obs_shape)
+
+        #TODO Verify this guy
+        if len(obs_shape) == 3 and obs_shape[2] in [1, 3, 4]:
+            env = WrapPyTorch(env)
+        return env
+
+    return _thunk
 
 class WrapPyTorch(gym.ObservationWrapper):
     def __init__(self, env=None):

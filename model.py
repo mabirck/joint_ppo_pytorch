@@ -20,33 +20,34 @@ class Policy(nn.Module):
         a feature exctractor for actor and critic (see examples below)
         and modules called linear_critic and dist. Where linear_critic
         takes critic features and maps them to value and dist
-        represents a distribution of actions.        
+        represents a distribution of actions.
         """
-        
+
     def forward(self, inputs, states, masks):
         raise NotImplementedError
 
     def act(self, inputs, states, masks, deterministic=False):
+        print(inputs.size())
         hidden_critic, hidden_actor, states = self(inputs, states, masks)
-        
+
         action = self.dist.sample(hidden_actor, deterministic=deterministic)
 
         action_log_probs, dist_entropy = self.dist.logprobs_and_entropy(hidden_actor, action)
         value = self.critic_linear(hidden_critic)
-        
+
         return value, action, action_log_probs, states
 
-    def get_value(self, inputs, states, masks):        
+    def get_value(self, inputs, states, masks):
         hidden_critic, _, states = self(inputs, states, masks)
         value = self.critic_linear(hidden_critic)
         return value
-    
+
     def evaluate_actions(self, inputs, states, masks, actions):
         hidden_critic, hidden_actor, states = self(inputs, states, masks)
 
         action_log_probs, dist_entropy = self.dist.logprobs_and_entropy(hidden_actor, actions)
         value = self.critic_linear(hidden_critic)
-        
+
         return value, action_log_probs, dist_entropy, states
 
 

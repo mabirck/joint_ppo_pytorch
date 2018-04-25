@@ -15,7 +15,7 @@ from arguments import get_args
 from baselines.common.vec_env.dummy_vec_env import DummyVecEnv
 from baselines.common.vec_env.subproc_vec_env import SubprocVecEnv
 from baselines.common.vec_env.vec_normalize import VecNormalize
-from envs import make_env
+from envs import make_env_train
 from model import CNNPolicy, MLPPolicy
 from storage import RolloutStorage
 from visualize import visdom_plot
@@ -55,7 +55,7 @@ def main():
         viz = Visdom(port=args.port)
         win = None
 
-    envs = [make_env(args.env_name, args.seed, i, args.log_dir)
+    envs = [make_env_train(args.env_name, args.seed, i, args.log_dir)
                 for i in range(args.num_processes)]
 
     if args.num_processes > 1:
@@ -160,7 +160,7 @@ def main():
         rollouts.compute_returns(next_value, args.use_gae, args.gamma, args.tau)
 
         value_loss, action_loss, dist_entropy = agent.update(rollouts)
-        
+
         rollouts.after_update()
 
         if j % args.save_interval == 0 and args.save_dir != "":
