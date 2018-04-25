@@ -13,7 +13,8 @@ from torch.autograd import Variable
 
 from arguments import get_args
 from baselines.common.vec_env.dummy_vec_env import DummyVecEnv
-from baselines.common.vec_env.subproc_vec_env import SubprocVecEnv
+#from baselines.common.vec_env.subproc_vec_env import SubprocVecEnv
+from sonic_tools.vec_env.subproc_vec_env import SubprocVecEnv
 from baselines.common.vec_env.vec_normalize import VecNormalize
 from envs import make_env_train
 from model import CNNPolicy, MLPPolicy
@@ -21,6 +22,7 @@ from storage import RolloutStorage
 from visualize import visdom_plot
 
 import algo
+from sonic_tools.tools import getListOfGames
 
 args = get_args()
 
@@ -55,10 +57,15 @@ def main():
         viz = Visdom(port=args.port)
         win = None
 
-    envs = [make_env_train(args.env_name, args.seed, i, args.log_dir)
-                for i in range(args.num_processes)]
+    names = getListOfGames("train")
 
-    if args.num_processes > 1:
+    envs = [make_env_train(names[i], args.seed, i, args.log_dir)
+                for i in range(len(names))]
+    # TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+    args.num_processes = len(envs)
+    # REMEMBER YOU CHENGED IT
+
+    if len(envs) > 1:
         envs = SubprocVecEnv(envs)
     else:
         envs = DummyVecEnv(envs)
@@ -67,7 +74,9 @@ def main():
         envs = VecNormalize(envs)
 
     obs_shape = envs.observation_space.shape
-    obs_shape = (obs_shape[0] * args.num_stack, *obs_shape[1:])
+    #print(obs_shape)
+    obs_shape = (obs_shape[0], *obs_shape[1:])
+    #print(obs_shape)
 
     if len(envs.observation_space.shape) == 3:
         actor_critic = CNNPolicy(obs_shape[0], envs.action_space, args.recurrent_policy)
@@ -99,13 +108,13 @@ def main():
                                args.entropy_coef, acktr=True)
 
     rollouts = RolloutStorage(args.num_steps, args.num_processes, obs_shape, envs.action_space, actor_critic.state_size)
-    current_obs = torch.zeros(args.num_processes, *obs_shape)
+    current_obs = torch.zeros(envs.nenvs, *obs_shape)
 
     def update_current_obs(obs):
         shape_dim0 = envs.observation_space.shape[0]
         obs = torch.from_numpy(obs).float()
-        if args.num_stack > 1:
-            current_obs[:, :-shape_dim0] = current_obs[:, shape_dim0:]
+        # if args.num_stack > 1:
+        #     current_obs[:, :-shape_dim0] = current_obs[:, shape_dim0:]
         current_obs[:, -shape_dim0:] = obs
 
     obs = envs.reset()
