@@ -27,7 +27,7 @@ class Policy(nn.Module):
         raise NotImplementedError
 
     def act(self, inputs, states, masks, deterministic=False):
-        print(inputs.size())
+        #print(inputs.size())
         hidden_critic, hidden_actor, states = self(inputs, states, masks)
 
         action = self.dist.sample(hidden_actor, deterministic=deterministic)
