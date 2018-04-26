@@ -86,7 +86,7 @@ def main():
         actor_critic = MLPPolicy(obs_shape[0], envs.action_space)
 
     # Making it paralel
-    model = torch.nn.DataParallel(actor_critic).cuda()
+    actor_critic = torch.nn.parallel.DataParallel(actor_critic)
 
     if envs.action_space.__class__.__name__ == "Discrete":
         action_shape = 1
@@ -94,23 +94,23 @@ def main():
         action_shape = envs.action_space.shape[0]
 
     if args.cuda:
-        actor_critic.cuda()
+        actor_critic.module.cuda()
 
     if args.algo == 'a2c':
-        agent = algo.A2C_ACKTR(actor_critic, args.value_loss_coef,
+        agent = algo.A2C_ACKTR(actor_critic.module, args.value_loss_coef,
                                args.entropy_coef, lr=args.lr,
                                eps=args.eps, alpha=args.alpha,
                                max_grad_norm=args.max_grad_norm)
     elif args.algo == 'ppo':
-        agent = algo.PPO(actor_critic, args.clip_param, args.ppo_epoch, args.num_mini_batch,
+        agent = algo.PPO(actor_critic.module, args.clip_param, args.ppo_epoch, args.num_mini_batch,
                          args.value_loss_coef, args.entropy_coef, lr=args.lr,
                                eps=args.eps,
                                max_grad_norm=args.max_grad_norm)
     elif args.algo == 'acktr':
-        agent = algo.A2C_ACKTR(actor_critic, args.value_loss_coef,
+        agent = algo.A2C_ACKTR(actor_critic.module, args.value_loss_coef,
                                args.entropy_coef, acktr=True)
 
-    rollouts = RolloutStorage(args.num_steps, args.num_processes, obs_shape, envs.action_space, actor_critic.state_size)
+    rollouts = RolloutStorage(args.num_steps, args.num_processes, obs_shape, envs.action_space, actor_critic.module.state_size)
     current_obs = torch.zeros(envs.nenvs, *obs_shape)
 
     def update_current_obs(obs):
@@ -137,7 +137,7 @@ def main():
     for j in range(num_updates):
         for step in range(args.num_steps):
             # Sample actions
-            value, action, action_log_prob, states = actor_critic.act(
+            value, action, action_log_prob, states = actor_critic.module.act(
                     Variable(rollouts.observations[step], volatile=True),
                     Variable(rollouts.states[step], volatile=True),
                     Variable(rollouts.masks[step], volatile=True))
@@ -165,7 +165,7 @@ def main():
             update_current_obs(obs)
             rollouts.insert(current_obs, states.data, action.data, action_log_prob.data, value.data, reward, masks)
 
-        next_value = actor_critic.get_value(Variable(rollouts.observations[-1], volatile=True),
+        next_value = actor_critic.module.get_value(Variable(rollouts.observations[-1], volatile=True),
                                             Variable(rollouts.states[-1], volatile=True),
                                             Variable(rollouts.masks[-1], volatile=True)).data
 
@@ -183,9 +183,9 @@ def main():
                 pass
 
             # A really ugly way to save a model to CPU
-            save_model = actor_critic
+            save_model = actor_critic.module
             if args.cuda:
-                save_model = copy.deepcopy(actor_critic).cpu()
+                save_model = copy.deepcopy(actor_critic.module).cpu()
 
             save_model = [save_model,
                             hasattr(envs, 'ob_rms') and envs.ob_rms or None]
