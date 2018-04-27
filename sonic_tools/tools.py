@@ -2,7 +2,7 @@ import csv
 
 def getListOfGames(regime):
     fileName = "./files/"
-    fileName += "sonic-train.csv" if regime == "train" else "sonic-validation.csv"
+    fileName += "sonic-all.csv" if regime == "train" else "sonic-validation.csv"
 
     names = list()
 
