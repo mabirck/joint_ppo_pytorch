@@ -134,7 +134,7 @@ def main():
     final_rewards = torch.zeros([args.num_processes, 1])
 
     if args.cuda:
-        current_obs = torch.nn.parallel.DataParallel(current_obs).module
+        current_obs = current_obs.cuda()
         rollouts.cuda()
 
     start = time.time()
@@ -159,7 +159,7 @@ def main():
             episode_rewards *= masks
 
             if args.cuda:
-                masks = torch.nn.parallel.DataParallel(masks).module
+                masks = masks.cuda()
 
             if current_obs.dim() == 4:
                 current_obs *= masks.unsqueeze(2).unsqueeze(2)
