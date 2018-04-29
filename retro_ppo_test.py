@@ -14,7 +14,7 @@ from torch.autograd import Variable
 from arguments import get_args
 #from baselines.common.vec_env.dummy_vec_env import DummyVecEnv
 from sonic_tools.vec_env.dummy_vec_env import DummyVecEnv
-from vec_env.subproc_vec_env import SubprocVecEnv
+from sonic_tools.vec_env.subproc_vec_env import SubprocVecEnv
 from baselines.common.vec_env.vec_normalize import VecNormalize
 from envs import make_env_test
 from model import CNNPolicy, MLPPolicy
@@ -124,6 +124,10 @@ def main():
     if args.cuda:
         current_obs = current_obs.cuda()
         rollouts.cuda()
+
+
+    # Load model
+    actor_critic = torch.load("./checkpoint.pt")
 
     start = time.time()
     for j in range(num_updates):

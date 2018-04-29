@@ -11,4 +11,4 @@ sudo docker tag openai/retro-env remote-env
 
 
 # PPO
-python main.py --env-name "SonicTheHedgehog-Genesis,GreenHillZone.Act1" --algo ppo --use-gae --lr 2e-4 --clip-param 0.1 --value-loss-coef 0.5 --num-processes 1 --num-steps 4096 --num-mini-batch 8 --vis-interval 1 --log-interval 1
+python retro_ppo_test.py --env-name "SonicTheHedgehog-Genesis,GreenHillZone.Act1" --algo ppo --use-gae --lr 2e-4 --clip-param 0.1 --value-loss-coef 0.5 --num-processes 1 --num-steps 4096 --num-mini-batch 8 --vis-interval 1 --log-interval 1

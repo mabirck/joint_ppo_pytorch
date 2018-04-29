@@ -93,8 +93,8 @@ def main():
     else:
         action_shape = envs.action_space.shape[0]
 
-    #if args.cuda:
-    #    actor_critic.cuda()
+    if args.cuda:
+       actor_critic.cuda()
 
     if args.algo == 'a2c':
         agent = algo.A2C_ACKTR(actor_critic, args.value_loss_coef,
@@ -135,7 +135,7 @@ def main():
 
     if args.cuda:
         current_obs = torch.nn.parallel.DataParallel(current_obs).module
-    #    rollouts.cuda()
+        rollouts.cuda()
 
     start = time.time()
     for j in range(num_updates):
