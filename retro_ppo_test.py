@@ -62,6 +62,11 @@ def main():
     #             for i in range(args.num_processes)]
     envs = [make_env_test()]
 
+    # TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+    args.num_processes = len(envs)
+    # REMEMBER YOU CHENGED IT
+
+
     if args.num_processes > 1:
         envs = SubprocVecEnv(envs)
     else:
@@ -71,7 +76,7 @@ def main():
         envs = VecNormalize(envs)
 
     obs_shape = envs.observation_space.shape
-    obs_shape = (obs_shape[0] * args.num_stack, *obs_shape[1:])
+    obs_shape = (obs_shape[0], *obs_shape[1:])
 
     if len(envs.observation_space.shape) == 3:
         actor_critic = CNNPolicy(obs_shape[0], envs.action_space, args.recurrent_policy)
@@ -108,8 +113,8 @@ def main():
     def update_current_obs(obs):
         shape_dim0 = envs.observation_space.shape[0]
         obs = torch.from_numpy(obs).float()
-        if args.num_stack > 1:
-            current_obs[:, :-shape_dim0] = current_obs[:, shape_dim0:]
+        # if args.num_stack > 1:
+        #     current_obs[:, :-shape_dim0] = current_obs[:, shape_dim0:]
         current_obs[:, -shape_dim0:] = obs
 
     obs = envs.reset()
@@ -128,6 +133,8 @@ def main():
 
     # Load model
     actor_critic = torch.load("./checkpoint.pt")
+    print(actor_critic)
+    actor_critic = actor_critic[0]
 
     start = time.time()
     for j in range(num_updates):
@@ -141,6 +148,8 @@ def main():
 
             # Obser reward and next obs
             obs, reward, done, info = envs.step(cpu_actions)
+            #envs.envs[0].render()
+            #time.sleep(0.1)
             reward = torch.from_numpy(np.expand_dims(np.stack(reward), 1)).float()
             episode_rewards += reward
 

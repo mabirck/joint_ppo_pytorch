@@ -25,6 +25,10 @@ def make_sonic_test(stack=True, scale_rew=True):
     Create an environment with some standard wrappers.
     """
     env = grc.RemoteEnv('tmp/sock')
+    #env_id = "SonicTheHedgehog-Genesis,GreenHillZone.Act1"
+    #game, state = env_id.split(',')
+    #env = make(game=game, state=state)
+
     env = SonicDiscretizer(env)
     if scale_rew:
         env = RewardScaler(env)

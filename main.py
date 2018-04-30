@@ -61,6 +61,7 @@ def main():
 
     envs = [make_env_train(names[i], args.seed, i, args.log_dir)
                 for i in range(len(names))]
+                
     # TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
     args.num_processes = len(envs)
     # REMEMBER YOU CHENGED IT
